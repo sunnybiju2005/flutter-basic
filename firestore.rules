@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // User profile rules
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Booking rules
+    match /bookings/{bookingId} {
+      // Users can read their own bookings, admins can read all
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid || 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      );
+      
+      // Users can create bookings
+      allow create: if request.auth != null;
+      
+      // Admins can update status, users can update their own pending booking
+      allow update: if request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true ||
+        (resource.data.userId == request.auth.uid && resource.data.status == 'pending')
+      );
+    }
+  }
+}
