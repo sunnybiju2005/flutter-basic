@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
 import '../models/booking.dart';
 
 class BookingProvider extends ChangeNotifier {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  // final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  // final FirebaseStorage _storage = FirebaseStorage.instance;
   bool _isLoading = false;
 
   bool get isLoading => _isLoading;
@@ -26,28 +26,8 @@ class BookingProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      String? paymentImageUrl;
-      if (paymentImage != null) {
-        String fileName = 'payments/${DateTime.now().millisecondsSinceEpoch}.jpg';
-        TaskSnapshot snapshot = await _storage.ref().child(fileName).putFile(paymentImage);
-        paymentImageUrl = await snapshot.ref.getDownloadURL();
-      }
-
-      Booking booking = Booking(
-        id: _firestore.collection('bookings').doc().id,
-        userId: userId,
-        userName: userName,
-        phone: phone,
-        checkIn: checkIn,
-        checkOut: checkOut,
-        guestName: guestName,
-        roomType: roomType,
-        paymentImageUrl: paymentImageUrl,
-        status: BookingStatus.pending,
-        createdAt: DateTime.now(),
-      );
-
-      await _firestore.collection('bookings').doc(booking.id).set(booking.toMap());
+      // Mock delay
+      await Future.delayed(const Duration(seconds: 1));
 
       _isLoading = false;
       notifyListeners();
@@ -62,34 +42,54 @@ class BookingProvider extends ChangeNotifier {
 
   // Stream of all bookings for Admin
   Stream<List<Booking>> allBookings() {
-    return _firestore
-        .collection('bookings')
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Booking.fromMap(doc.data(), doc.id))
-            .toList());
+    return Stream.value([
+      Booking(
+        id: '1',
+        userId: 'u1',
+        userName: 'John Doe',
+        phone: '1234567890',
+        checkIn: DateTime.now(),
+        checkOut: DateTime.now().add(const Duration(days: 2)),
+        guestName: 'John Doe',
+        roomType: 'Deluxe Room',
+        status: BookingStatus.confirmed,
+        createdAt: DateTime.now(),
+      ),
+      Booking(
+        id: '2',
+        userId: 'u2',
+        userName: 'Jane Smith',
+        phone: '0987654321',
+        checkIn: DateTime.now().add(const Duration(days: 1)),
+        checkOut: DateTime.now().add(const Duration(days: 3)),
+        guestName: 'Jane Smith',
+        roomType: 'Suite',
+        status: BookingStatus.pending,
+        createdAt: DateTime.now(),
+      ),
+    ]);
   }
 
   // Stream of bookings for today
   Stream<List<Booking>> getBookingsForDate(DateTime date) {
-    DateTime start = DateTime(date.year, date.month, date.day);
-    DateTime end = start.add(const Duration(days: 1));
-
-    return _firestore
-        .collection('bookings')
-        .where('checkIn', isGreaterThanOrEqualTo: start)
-        .where('checkIn', isLessThan: end)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Booking.fromMap(doc.data(), doc.id))
-            .toList());
+    return Stream.value([
+      Booking(
+        id: '1',
+        userId: 'u1',
+        userName: 'John Doe',
+        phone: '1234567890',
+        checkIn: DateTime.now(),
+        checkOut: DateTime.now().add(const Duration(days: 2)),
+        guestName: 'John Doe',
+        roomType: 'Deluxe Room',
+        status: BookingStatus.confirmed,
+        createdAt: DateTime.now(),
+      ),
+    ]);
   }
 
   Future<void> updateStatus(String bookingId, BookingStatus status, {String? reason}) async {
-    await _firestore.collection('bookings').doc(bookingId).update({
-      'status': status.name,
-      'rejectionReason': reason,
-    });
+    await Future.delayed(const Duration(milliseconds: 500));
+    notifyListeners();
   }
 }

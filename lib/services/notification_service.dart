@@ -1,11 +1,13 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
-  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  // final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
+    // Mock initialization
+    print("Notification Service initialized (Mock)");
+    /*
     // Request permission
     NotificationSettings settings = await _fcm.requestPermission(
       alert: true,
@@ -28,6 +30,7 @@ class NotificationService {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       _showLocalNotification(message);
     });
+    */
 
     // Setup local notifications
     const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -35,10 +38,11 @@ class NotificationService {
     await _localNotifications.initialize(initializationSettings);
   }
 
-  static Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-    print("Handling a background message: ${message.messageId}");
-  }
+  // static Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  //   print("Handling a background message: ${message.messageId}");
+  // }
 
+  /*
   void _showLocalNotification(RemoteMessage message) {
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
@@ -59,4 +63,5 @@ class NotificationService {
       );
     }
   }
+  */
 }

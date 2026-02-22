@@ -8,11 +8,14 @@ import 'screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Commented out for UI preview as per user request
+  /*
   try {
     await Firebase.initializeApp(); // Real Firebase initialization
   } catch (e) {
     print("Firebase initialization error: $e");
   }
+  */
   runApp(const MyApp());
 }
 
