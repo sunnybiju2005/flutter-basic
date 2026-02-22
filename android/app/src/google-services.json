@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "875606607101",
+    "project_id": "gaurikeerthana-residency-c3ba4",
+    "storage_bucket": "gaurikeerthana-residency-c3ba4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:875606607101:android:de7d2b26d2599502466a94",
+        "android_client_info": {
+          "package_name": "com.example.gaurikeerthana_residency"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAPWgbhQXY6tVa1Txraf5QR30KT_miNYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

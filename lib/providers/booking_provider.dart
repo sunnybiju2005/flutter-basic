@@ -1,17 +1,17 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_storage/firebase_storage.dart';
 import '../models/booking.dart';
+import '../services/database_service.dart';
+import '../services/storage_service.dart';
 
 class BookingProvider extends ChangeNotifier {
-  // final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  // final FirebaseStorage _storage = FirebaseStorage.instance;
+  final DatabaseService _dbService = DatabaseService();
+  final StorageService _storageService = StorageService();
   bool _isLoading = false;
 
   bool get isLoading => _isLoading;
 
-  // Create a new booking (Used by both App and potentially Website)
+  // Create a new booking
   Future<bool> createBooking({
     required String userId,
     required String userName,
@@ -26,8 +26,25 @@ class BookingProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Mock delay
-      await Future.delayed(const Duration(seconds: 1));
+      String? paymentUrl;
+      if (paymentImage != null) {
+        paymentUrl = await _storageService.uploadFile(paymentImage, 'payments/${DateTime.now().millisecondsSinceEpoch}.jpg');
+      }
+
+      final booking = Booking(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: userId,
+        userName: userName,
+        phone: phone,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        guestName: guestName,
+        roomType: roomType,
+        paymentImageUrl: paymentUrl,
+        createdAt: DateTime.now(),
+      );
+
+      await _dbService.createBooking(booking);
 
       _isLoading = false;
       notifyListeners();
@@ -42,54 +59,23 @@ class BookingProvider extends ChangeNotifier {
 
   // Stream of all bookings for Admin
   Stream<List<Booking>> allBookings() {
-    return Stream.value([
-      Booking(
-        id: '1',
-        userId: 'u1',
-        userName: 'John Doe',
-        phone: '1234567890',
-        checkIn: DateTime.now(),
-        checkOut: DateTime.now().add(const Duration(days: 2)),
-        guestName: 'John Doe',
-        roomType: 'Deluxe Room',
-        status: BookingStatus.confirmed,
-        createdAt: DateTime.now(),
-      ),
-      Booking(
-        id: '2',
-        userId: 'u2',
-        userName: 'Jane Smith',
-        phone: '0987654321',
-        checkIn: DateTime.now().add(const Duration(days: 1)),
-        checkOut: DateTime.now().add(const Duration(days: 3)),
-        guestName: 'Jane Smith',
-        roomType: 'Suite',
-        status: BookingStatus.pending,
-        createdAt: DateTime.now(),
-      ),
-    ]);
+    return _dbService.getAllBookings();
   }
 
-  // Stream of bookings for today
+  // Stream of bookings for current user
+  Stream<List<Booking>> userBookings(String userId) {
+    return _dbService.getUserBookings(userId);
+  }
+
+  // Stream of bookings for a specific date
   Stream<List<Booking>> getBookingsForDate(DateTime date) {
-    return Stream.value([
-      Booking(
-        id: '1',
-        userId: 'u1',
-        userName: 'John Doe',
-        phone: '1234567890',
-        checkIn: DateTime.now(),
-        checkOut: DateTime.now().add(const Duration(days: 2)),
-        guestName: 'John Doe',
-        roomType: 'Deluxe Room',
-        status: BookingStatus.confirmed,
-        createdAt: DateTime.now(),
-      ),
-    ]);
+    return _dbService.getAllBookings().map((bookings) => bookings.where((b) {
+      return b.checkIn.year == date.year && b.checkIn.month == date.month && b.checkIn.day == date.day;
+    }).toList());
   }
 
   Future<void> updateStatus(String bookingId, BookingStatus status, {String? reason}) async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    await _dbService.updateBookingStatus(bookingId, status, reason: reason);
     notifyListeners();
   }
 }
